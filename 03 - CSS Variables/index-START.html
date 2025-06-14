@@ -46,6 +46,19 @@
   </style>
 
   <script>
+    const spacing = document.getElementById('spacing')
+    const blurr = document.getElementById('blur')
+    const color = document.getElementById('base')
+    const img = document.querySelector('img')
+
+    function changeStyle(){
+        img.style.filter = `blur(${blurr.value}px)`
+        img.style.background = `${color.value}`
+        img.style.padding = `${spacing.value}px`
+    }
+
+    document.addEventListener('click', changeStyle)
+
   </script>
 
 </body>
