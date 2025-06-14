@@ -17,6 +17,43 @@
   </form>
 <script>
 const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+const input = document.querySelector('.search')
+const suggestions = document.querySelector('.suggestions')
+
+function removeAllChild(element){
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+}
+
+function fetchLocation() {
+    removeAllChild(suggestions)
+
+    fetch(endpoint)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Erreur HTTP: ' + response.status);
+        }
+      })
+      .then(data => {
+        if (input.value){
+          const searchResults = data.filter((item) => item.city.includes(input.value) || item.state.includes(input.value))
+            searchResults.forEach(searchResult => suggestions.innerHTML += 
+              `<li>
+                <span class="name">${searchResult.city}, ${searchResult.state}</span>
+                <span class="population">${searchResult.population}</span>
+              </li>`
+            )
+          }
+        })
+      .catch(error => {
+        console.error('Erreur:', error);
+      });
+} 
+
+  input.addEventListener('input', fetchLocation)
 
 </script>
 </body>
