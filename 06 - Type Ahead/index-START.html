@@ -20,40 +20,63 @@ const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb
 const input = document.querySelector('.search')
 const suggestions = document.querySelector('.suggestions')
 
+let cities = []
+
+fetch(endpoint)
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error('Erreur HTTP: ' + response.status);
+    }
+  })
+  .then(data => {
+    cities = data
+    })
+  .catch(error => {
+    console.error('Erreur:', error);
+  });
+
 function removeAllChild(element){
   while (element.firstChild) {
     element.removeChild(element.firstChild);
   }
+
+}
+function debounce(callback, delay){
+    var timer;
+    return function(){
+        var args = arguments;
+        var context = this;
+        clearTimeout(timer);
+        timer = setTimeout(function(){
+            callback.apply(context, args);
+        }, delay)
+    }
 }
 
 function fetchLocation() {
     removeAllChild(suggestions)
-
-    fetch(endpoint)
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Erreur HTTP: ' + response.status);
-        }
-      })
-      .then(data => {
-        if (input.value){
-          const searchResults = data.filter((item) => item.city.includes(input.value) || item.state.includes(input.value))
-            searchResults.forEach(searchResult => suggestions.innerHTML += 
-              `<li>
-                <span class="name">${searchResult.city}, ${searchResult.state}</span>
-                <span class="population">${searchResult.population}</span>
-              </li>`
-            )
-          }
-        })
-      .catch(error => {
-        console.error('Erreur:', error);
-      });
+    if (input.value && cities){
+      const searchResults = cities.filter((item) => item.city.toLowerCase().includes(input.value.toLowerCase()) || item.state.toLowerCase().includes(input.value.toLowerCase()))
+      if (searchResults.length){
+        searchResults.forEach(searchResult => suggestions.innerHTML += 
+                `<li>
+                  <span class="name">${searchResult.city}, ${searchResult.state}</span>
+                  <span class="population">${searchResult.population}</span>
+                </li>`
+              )
+      } else {
+          suggestions.innerHTML += 
+            `<li>
+              <span class="name">Aucun résultat</span>
+              <span class="population">0</span>
+            </li>`
+      }
+    }
 } 
 
-  input.addEventListener('input', fetchLocation)
+input.addEventListener('input', debounce(fetchLocation, 350))
 
 </script>
 </body>
