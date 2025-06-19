@@ -6,13 +6,145 @@
   <link rel="icon" href="https://fav.farm/🔥" />
 </head>
 <body>
+<div class="mode">
+  <h2>Mode de dessin : </h2>
+  <div>
+    <p id="rainbow" class="active">R</p>
+    <p id="mono">M</p>
+    <p id="spray">S</p>
+  </div>
+</div>
 <canvas id="draw" width="800" height="800"></canvas>
 <script>
+    let canvas = document.getElementById("draw");
+    let ctx = canvas.getContext("2d");
+
+    let rainbowIndicator = document.getElementById("rainbow")
+    let monoIndicator = document.getElementById("mono")
+    let sprayIndicator = document.getElementById("spray")
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.strokeStyle = '#BADA55';
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 100;
+
+    let isDrawing = false
+    let lastX = 0;
+    let lastY = 0;
+    let hue = 0;
+    let direction = true;
+    let mode = "rainbow"
+
+    const switchMode = (e) => {
+      if (e.keyCode === 114 ){
+        mode = "rainbow"
+        rainbowIndicator.classList.add("active")
+        monoIndicator.classList.remove("active")
+        sprayIndicator.classList.remove("active")
+      } else if (e.keyCode === 109){
+        mode = "mono"
+        rainbowIndicator.classList.remove("active")
+        monoIndicator.classList.add("active")
+        sprayIndicator.classList.remove("active")
+      } else if (e.keyCode === 115){
+        mode = "spray"
+        rainbowIndicator.classList.remove("active")
+        monoIndicator.classList.remove("active")
+        sprayIndicator.classList.add("active")
+      }
+    }
+
+    function draw(e) {
+        if (!isDrawing) return; 
+
+        if (mode === "rainbow" || mode === "spray"){
+            ctx.strokeStyle = `hsl(${hue}, 100%, 90%)`;
+            ctx.fillStyle =  `hsl(${hue}, 100%, 90%)`;
+            hue++;
+            if (hue >= 360) {
+                hue = 0;
+            }
+            if (ctx.lineWidth >= 100 || ctx.lineWidth <= 1) {
+                direction = !direction;
+            }
+            if(direction) {
+                ctx.lineWidth++;
+            } else {
+                ctx.lineWidth--;
+            }
+        } else if (mode === "mono"){
+            ctx.strokeStyle = 'red'
+            ctx.lineWidth = 10
+        } 
+
+        if (mode === "mono" || mode === "rainbow"){
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        } else if (mode === "spray"){
+          for (let i = 0; i < 20; i++) { 
+
+
+            const sprayX = e.offsetX + (Math.random() - 0.5) * 50;
+            const sprayY = e.offsetY + (Math.random() - 0.5) * 50;      
+            ctx.beginPath()
+            ctx.arc(sprayX, sprayY, 2, 0, Math.PI * 2)
+            ctx.fill()
+          }
+        }
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    });
+
+    document.addEventListener('keypress', switchMode)
+
+
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mouseout', () => isDrawing = false);
 </script>
 
 <style>
   html, body {
     margin: 0;
+    overflow: hidden;
+  }
+  .mode{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    background-color: lightgray;
+    border-radius: 20px;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-inline: 12px;
+    gap: 24px;
+    font-family: sans-serif;
+  }
+
+  .mode > div{
+    display: flex;
+    align-items: center;
+    gap: 10px
+  }
+
+  p {
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid black;
+    box-shadow: 2px 2px 2px hsl(0, 10%, 20%);
+  }
+
+  .active{
+    background-color: greenyellow;
   }
 </style>
 
