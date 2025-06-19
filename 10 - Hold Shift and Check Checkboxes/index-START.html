@@ -96,7 +96,43 @@
     </div>
   </div>
 
-<script>
+<script defer>
+  let isHoldingShift = false
+  let inputs = Array.from(document.querySelectorAll('input'))
+  let lastInputChecked = []
+
+  inputs.forEach((input, index) => {
+    input.setAttribute('data-id', index + 1)
+    input.addEventListener("click", () => {
+      if (input.checked){
+          lastInputChecked.unshift(input)
+          if(lastInputChecked.length > 1){
+            checkMultipleElement(input)
+          }
+      }
+      else 
+        lastInputChecked.splice(lastInputChecked.indexOf(input), 1)
+    })
+  })
+
+  const checkMultipleElement = (input) => {
+    if (!isHoldingShift) return false
+    const id1 = Number(lastInputChecked[0].dataset.id);
+    const id2 = Number(lastInputChecked[1].dataset.id);
+    const [start, end] = id1 < id2 ? [id1, id2] : [id2, id1];
+    for (let i = start; i <= end; i++){
+      const input = inputs.find(input => input.dataset.id === String(i))
+      input.checked = true
+    }
+  } 
+
+  document.addEventListener("keydown", (e) => {
+    if(e.keyCode === 16) 
+      isHoldingShift = true
+  })
+  document.addEventListener("keyup", (e) => {
+    if (e.key === "Shift") isHoldingShift = false
+  })
 </script>
 </body>
 </html>
